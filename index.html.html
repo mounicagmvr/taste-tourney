@@ -1,239 +1,297 @@
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --c1:#1A1A2E;--c2:#E8462A;--c3:#F5F0E8;--fg:#1A1A2E;--fg2:#6B6560;--fg3:#A09890;--border:#E8E0D5;--white:#FFFFFF;--r:16px;--rs:10px;
+  --c1:#1A1A2E;--c2:#E8462A;--c3:#F5F0E8;--fg:#1A1A2E;--fg2:#6B6560;--fg3:#A09890;--border:#E8E0D5;--Background:#0A0A0F;--r:16px;--rs:10px;
 }
-body{font-family:'DM Sans',sans-serif;background:#F5F0E8;color:var(--fg);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px;}
+body{font-family:'DM Sans',sans-serif;background:#0A0A0F;color:var(--fg);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px;}
 h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:500;}
-.app-shell{width:100%;max-width:420px;}
-.screen{display:none;flex-direction:column;background:var(--white);border-radius:32px;overflow:hidden;box-shadow:0 24px 60px rgba(26,26,46,0.12);}
-.screen.active{display:flex;}
+
+/* NAV DOTS */
 .nav-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px;}
 .nav-dot{width:6px;height:6px;border-radius:50%;background:var(--fg3);cursor:pointer;transition:all .2s;}
 .nav-dot.active{width:20px;border-radius:3px;background:var(--c2);}
-.status-bar{padding:12px 20px 0;display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:500;color:var(--fg2);}
-.screen-header{padding:8px 20px 16px;display:flex;align-items:center;gap:12px;}
+
+/* CORE: every screen is exactly 390x844 — iPhone 13 screen size */
+.app-shell{width:390px;flex-shrink:0;}
+.screen{
+  display:none;
+  flex-direction:column;
+  width:390px;
+  height:844px;
+  background:var(--white);
+  border-radius:0;
+  overflow:hidden;
+  position:relative;
+}
+.screen.active{display:flex;}
+
+/* Scrollable inner content wrapper — used on screens with more content */
+.screen-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.screen-scroll::-webkit-scrollbar{display:none;}
+
+/* STATUS BAR — fixed 44px at top of every screen */
+.status-bar{
+  height:44px;
+  padding:12px 20px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:11px;
+  font-weight:500;
+  color:var(--fg2);
+  flex-shrink:0;
+}
+.status-bar.light{color:rgba(255,255,255,.6);}
+
+/* SCREEN HEADER */
+.screen-header{padding:8px 20px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .back-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background:var(--white);}
 .spacer{flex:1;}
+
+/* BUTTONS */
 .btn-primary{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--c2);color:white;border:none;border-radius:100px;padding:15px 24px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:transform .15s,opacity .15s;width:100%;}
 .btn-primary:hover{opacity:.9;}
 .btn-primary:active{transform:scale(.98);}
 .btn-outline{display:flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:var(--fg);border:1.5px solid var(--border);border-radius:100px;padding:14px 24px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;width:100%;}
 .btn-sm{padding:9px 18px;font-size:13px;}
+.btn-inv{background:rgba(255,255,255,.12);color:white;border:none;border-radius:100px;padding:15px 24px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;width:100%;}
+
+/* BADGE */
 .badge{display:inline-flex;align-items:center;gap:5px;background:var(--c3);color:var(--fg2);border-radius:100px;padding:5px 12px;font-size:12px;font-weight:500;}
 .badge.red{background:#FDE8E5;color:var(--c2);}
 .badge.green{background:#E5F5EB;color:#1E7A3C;}
 .badge.dark{background:var(--c1);color:white;}
-.bottom-nav{margin-top:auto;border-top:1.5px solid var(--border);display:flex;padding:12px 0 20px;}
+
+/* BOTTOM NAV — always 64px, pinned to bottom */
+.bottom-nav{height:64px;border-top:1.5px solid var(--border);display:flex;padding:10px 0 8px;flex-shrink:0;}
 .bottom-nav .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:500;color:var(--fg3);cursor:pointer;}
 .bottom-nav .nav-item.active{color:var(--c2);}
 .bottom-nav .nav-item svg{width:20px;height:20px;}
 
-/* SPLASH */
-#s-splash .splash-bg{background:var(--c1);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;gap:28px;}
-#s-splash .logo-mark{width:80px;height:80px;border-radius:24px;background:var(--c2);display:flex;align-items:center;justify-content:center;}
-#s-splash h1{font-size:36px;color:white;text-align:center;line-height:1.15;}
-#s-splash h1 em{color:var(--c2);font-style:normal;}
-#s-splash p{color:rgba(255,255,255,.6);text-align:center;font-size:15px;line-height:1.6;}
-#s-splash .splash-bottom{padding:24px;display:flex;flex-direction:column;gap:12px;}
+/* ===== SPLASH ===== */
+#s-splash{background:var(--c1);}
+#s-splash .splash-hero{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 32px 20px;gap:24px;
+  background:var(--c1);
+}
+#s-splash .splash-hero .logo-mark{width:80px;height:80px;border-radius:24px;background:var(--c2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#s-splash .splash-hero h1{font-size:34px;color:white;text-align:center;line-height:1.15;}
+#s-splash .splash-hero h1 em{color:var(--c2);font-style:normal;}
+#s-splash .splash-hero p{color:rgba(255,255,255,.6);text-align:center;font-size:14px;line-height:1.6;}
+#s-splash .splash-bottom{padding:20px 24px 32px;display:flex;flex-direction:column;gap:12px;background:var(--c1);flex-shrink:0;}
 
-/* HOME */
-#s-home .home-hero{background:var(--c1);padding:20px 20px 32px;}
+/* ===== HOME ===== */
+#s-home .home-hero{background:var(--c1);padding:16px 20px 28px;flex-shrink:0;}
 #s-home .home-hero .greeting{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:4px;}
-#s-home .home-hero h2{font-size:26px;color:white;}
+#s-home .home-hero h2{font-size:24px;color:white;}
 #s-home .home-hero h2 span{color:var(--c2);}
-#s-home .active-card{margin:0 20px;margin-top:-20px;background:var(--white);border-radius:20px;padding:18px;border:1.5px solid var(--border);display:flex;flex-direction:column;gap:14px;}
-#s-home .active-card .card-label{font-size:11px;font-weight:500;color:var(--fg3);letter-spacing:.06em;text-transform:uppercase;}
-#s-home .active-card .avatar{width:28px;height:28px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:white;margin-right:-8px;}
-#s-home .active-card .member-info{font-size:12px;color:var(--fg2);margin-left:16px;}
-#s-home .active-card .prog-bar{flex:1;height:5px;background:var(--c3);border-radius:3px;overflow:hidden;}
-#s-home .active-card .prog-fill{height:100%;background:var(--c2);border-radius:3px;}
-#s-home .section-row{padding:20px 20px 8px;display:flex;align-items:center;justify-content:space-between;}
-#s-home .past-card{margin:0 20px 10px;background:var(--c3);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;}
-#s-home .past-card .past-icon{width:42px;height:42px;border-radius:12px;background:var(--c2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-#s-home .past-card .past-winner{margin-left:auto;text-align:right;}
-#s-home .past-card .past-winner span{font-size:11px;color:var(--fg3);}
-#s-home .past-card .past-winner p{font-size:13px;font-weight:500;color:var(--c2);}
+#s-home .home-content{flex:1;overflow-y:auto;padding-bottom:8px;}
+#s-home .home-content::-webkit-scrollbar{display:none;}
+.active-card{margin:0 16px;margin-top:-18px;background:var(--white);border-radius:18px;padding:16px;border:1.5px solid var(--border);display:flex;flex-direction:column;gap:12px;}
+.card-label{font-size:11px;font-weight:500;color:var(--fg3);letter-spacing:.06em;text-transform:uppercase;}
+.avatar{width:26px;height:26px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:white;margin-right:-6px;}
+.member-info{font-size:12px;color:var(--fg2);margin-left:12px;}
+.prog-bar{flex:1;height:5px;background:var(--c3);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--c2);border-radius:3px;}
+.section-row{padding:16px 16px 8px;display:flex;align-items:center;justify-content:space-between;}
+.section-row h3{font-size:15px;}
+.section-row .see-all{font-size:12px;color:var(--c2);font-weight:500;cursor:pointer;}
+.past-card{margin:0 16px 8px;background:var(--c3);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.past-icon{width:38px;height:38px;border-radius:10px;background:var(--c2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.past-winner{margin-left:auto;text-align:right;}
+.past-winner span{font-size:11px;color:var(--fg3);}
+.past-winner p{font-size:12px;font-weight:500;color:var(--c2);}
+.new-btn-wrap{padding:12px 16px 16px;}
 
-/* CREATE */
-#s-create .create-body{padding:0 20px 24px;flex:1;display:flex;flex-direction:column;gap:20px;}
+/* ===== CREATE ===== */
+#s-create .create-scroll{flex:1;overflow-y:auto;padding:0 20px 16px;display:flex;flex-direction:column;gap:18px;}
+#s-create .create-scroll::-webkit-scrollbar{display:none;}
 .form-group{display:flex;flex-direction:column;gap:8px;}
-.form-group label{font-size:12px;font-weight:500;color:var(--fg2);letter-spacing:.04em;text-transform:uppercase;}
-.form-group input{border:1.5px solid var(--border);border-radius:var(--rs);padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--fg);background:var(--white);outline:none;}
+.form-group label{font-size:11px;font-weight:500;color:var(--fg2);letter-spacing:.04em;text-transform:uppercase;}
+.form-group input{border:1.5px solid var(--border);border-radius:var(--rs);padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--fg);background:var(--white);outline:none;}
 .form-group input:focus{border-color:var(--c2);}
 .form-group input::placeholder{color:var(--fg3);}
-.city-chips{display:flex;flex-wrap:wrap;gap:8px;}
-.city-chip{padding:8px 16px;border-radius:100px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;background:var(--white);}
+.city-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.city-chip{padding:7px 14px;border-radius:100px;border:1.5px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;background:var(--white);}
 .city-chip.selected{background:var(--c2);color:white;border-color:var(--c2);}
-.contact-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--c3);}
-.contact-row .avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:white;flex-shrink:0;}
-.contact-row .contact-info{flex:1;}
-.contact-row .contact-info p{font-size:14px;font-weight:500;}
-.contact-row .contact-info span{font-size:12px;color:var(--fg2);}
-.contact-row .check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
-.contact-row .check.on{background:var(--c2);border-color:var(--c2);}
-.contact-row .check svg{display:none;width:12px;height:12px;}
-.contact-row .check.on svg{display:block;}
+.contact-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--c3);}
+.contact-row .c-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:white;flex-shrink:0;}
+.contact-info{flex:1;}
+.contact-info p{font-size:13px;font-weight:500;}
+.contact-info span{font-size:11px;color:var(--fg2);}
+.check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.check.on{background:var(--c2);border-color:var(--c2);}
+.check svg{display:none;width:11px;height:11px;}
+.check.on svg{display:block;}
+.create-footer{padding:12px 20px 24px;flex-shrink:0;}
 
-/* NOMINATE */
-#s-nominate .nom-body{padding:0 20px 24px;flex:1;display:flex;flex-direction:column;gap:16px;}
-.nom-info{background:var(--c3);border-radius:var(--r);padding:16px;display:flex;gap:14px;align-items:flex-start;}
-.nom-icon{width:36px;height:36px;border-radius:10px;background:var(--c2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.nom-input-row{display:flex;gap:10px;align-items:center;}
-.nom-input-row input{flex:1;border:1.5px solid var(--border);border-radius:var(--rs);padding:12px 16px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;}
+/* ===== NOMINATE ===== */
+#s-nominate .nom-scroll{flex:1;overflow-y:auto;padding:0 16px 12px;display:flex;flex-direction:column;gap:14px;}
+#s-nominate .nom-scroll::-webkit-scrollbar{display:none;}
+.nom-info{background:var(--c3);border-radius:var(--r);padding:14px;display:flex;gap:12px;align-items:flex-start;}
+.nom-icon{width:34px;height:34px;border-radius:9px;background:var(--c2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nom-input-row{display:flex;gap:8px;align-items:center;}
+.nom-input-row input{flex:1;border:1.5px solid var(--border);border-radius:var(--rs);padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;}
 .nom-input-row input:focus{border-color:var(--c2);}
-.add-btn{width:44px;height:44px;background:var(--c2);border:none;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
-.nom-item{display:flex;align-items:center;gap:12px;background:var(--c3);border-radius:var(--rs);padding:12px 14px;}
-.nom-num{width:24px;height:24px;border-radius:50%;background:var(--c2);color:white;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.nom-name{font-size:14px;font-weight:500;}
-.nom-cuisine{font-size:12px;color:var(--fg2);}
-.del-btn{width:28px;height:28px;border:none;background:none;cursor:pointer;color:var(--fg3);display:flex;align-items:center;justify-content:center;}
+.add-btn{width:42px;height:42px;background:var(--c2);border:none;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.nom-item{display:flex;align-items:center;gap:10px;background:var(--c3);border-radius:var(--rs);padding:11px 12px;}
+.nom-num{width:22px;height:22px;border-radius:50%;background:var(--c2);color:white;font-size:10px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nom-name{font-size:13px;font-weight:500;}
+.nom-cuisine{font-size:11px;color:var(--fg2);}
+.del-btn{width:26px;height:26px;border:none;background:none;cursor:pointer;color:var(--fg3);display:flex;align-items:center;justify-content:center;}
+.nom-footer{padding:12px 16px 24px;flex-shrink:0;}
 
-/* ROUND HEADER */
-.round-hdr{padding:20px 20px 24px;}
-.round-hdr .round-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px;}
-.round-hdr h2{font-size:22px;color:white;font-family:'Fraunces',serif;}
-.round-hdr .sub{font-size:13px;color:rgba(255,255,255,.5);margin-top:4px;}
-.round-hdr .hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.round-body{padding:20px;flex:1;display:flex;flex-direction:column;gap:16px;}
+/* ===== ROUND SCREENS ===== */
+.round-hdr{padding:16px 20px 20px;flex-shrink:0;}
+.round-hdr .round-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;}
+.round-hdr h2{font-size:20px;color:white;font-family:'Fraunces',serif;}
+.round-hdr .sub{font-size:12px;color:rgba(255,255,255,.5);margin-top:3px;}
+.round-hdr .hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.round-body{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
+.round-body::-webkit-scrollbar{display:none;}
+.round-footer{padding:0 16px 24px;flex-shrink:0;}
 
-/* PROGRESS PIPS */
-.pips{display:flex;align-items:center;gap:8px;justify-content:center;}
-.pip{width:8px;height:8px;border-radius:50%;background:var(--border);}
+/* PIPS */
+.pips{display:flex;align-items:center;gap:7px;justify-content:center;}
+.pip{width:7px;height:7px;border-radius:50%;background:var(--border);}
 .pip.done{background:var(--c2);}
-.pip.active{width:24px;border-radius:4px;background:var(--c2);}
+.pip.active{width:22px;border-radius:4px;background:var(--c2);}
+.vote-instruction{text-align:center;font-size:12px;color:var(--fg2);}
 
-/* VOTE CARDS */
-.vote-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.vote-card{background:var(--c3);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:all .2s;border:2px solid transparent;}
+/* VOTE CARDS — 2x2 grid, compact for 390px */
+.vote-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.vote-card{background:var(--c3);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:7px;cursor:pointer;transition:all .2s;border:2px solid transparent;}
 .vote-card:hover{border-color:var(--c2);background:var(--white);}
 .vote-card.selected{border-color:var(--c2);background:var(--white);}
 .vote-card.selected .vote-check{background:var(--c2);border-color:var(--c2);}
 .vote-card.selected .vote-check svg{display:block;}
-.vote-card .vote-emoji{font-size:26px;}
-.vote-card .vote-name{font-size:13px;font-weight:500;font-family:'Fraunces',serif;line-height:1.3;}
-.vote-card .vote-meta{font-size:11px;color:var(--fg2);}
+.vote-card .vote-emoji{font-size:22px;}
+.vote-card .vote-name{font-size:12px;font-weight:500;font-family:'Fraunces',serif;line-height:1.3;}
+.vote-card .vote-meta{font-size:10px;color:var(--fg2);}
 .vote-card .vote-top{display:flex;align-items:flex-start;justify-content:space-between;}
-.vote-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.vote-check svg{display:none;width:11px;height:11px;}
-.vote-instruction{text-align:center;font-size:13px;color:var(--fg2);}
+.vote-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.vote-check svg{display:none;width:10px;height:10px;}
 
 /* DUEL CARDS */
-.duel-card{background:var(--c3);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:all .2s;border:2px solid transparent;}
+.match-section{display:flex;flex-direction:column;gap:8px;}
+.duel-card{background:var(--c3);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:all .2s;border:2px solid transparent;}
 .duel-card:hover{border-color:#7B61FF;background:var(--white);}
 .duel-card.selected{border-color:#7B61FF;background:var(--white);}
-.duel-card .duel-emoji{font-size:32px;}
-.duel-card h3{font-size:18px;font-family:'Fraunces',serif;}
-.duel-card .duel-meta{font-size:12px;color:var(--fg2);}
-.duel-card .duel-votes{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
-.vs-divider{text-align:center;font-size:12px;font-weight:500;color:var(--fg3);letter-spacing:.1em;}
-.match-label{font-size:11px;font-weight:500;color:var(--fg3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.duel-card .duel-emoji{font-size:28px;}
+.duel-card h3{font-size:16px;font-family:'Fraunces',serif;}
+.duel-card .duel-meta{font-size:11px;color:var(--fg2);}
+.duel-card .duel-votes{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
+.vs-divider{text-align:center;font-size:11px;font-weight:500;color:var(--fg3);letter-spacing:.1em;}
 
 /* FINALIST CARDS */
-.finalist-card{background:var(--c3);border-radius:22px;padding:22px;cursor:pointer;border:2.5px solid transparent;transition:all .2s;}
+.finalist-card{background:var(--c3);border-radius:18px;padding:16px;cursor:pointer;border:2.5px solid transparent;transition:all .2s;}
 .finalist-card:hover,.finalist-card.selected{background:var(--white);border-color:var(--c2);}
-.fin-number{font-size:11px;font-weight:500;color:var(--fg3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;}
-.fin-emoji{font-size:40px;display:block;margin-bottom:10px;}
-.finalist-card h3{font-size:20px;font-family:'Fraunces',serif;margin-bottom:6px;}
-.fin-meta{font-size:13px;color:var(--fg2);margin-bottom:14px;}
+.fin-number{font-size:10px;font-weight:500;color:var(--fg3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+.fin-emoji{font-size:34px;display:block;margin-bottom:8px;}
+.finalist-card h3{font-size:18px;font-family:'Fraunces',serif;margin-bottom:4px;}
+.fin-meta{font-size:12px;color:var(--fg2);margin-bottom:10px;}
 .fin-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
 .fin-fill{height:100%;border-radius:2px;background:var(--c2);}
-.fin-stats{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--fg2);}
+.fin-stats{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--fg2);}
 
 /* WINNER */
 #s-winner{background:var(--c1);}
-#s-winner .winner-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:22px;}
-.trophy-circle{width:100px;height:100px;border-radius:50%;background:var(--c2);display:flex;align-items:center;justify-content:center;font-size:46px;}
+#s-winner .winner-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 24px;gap:16px;}
+#s-winner .winner-scroll::-webkit-scrollbar{display:none;}
+.trophy-circle{width:88px;height:88px;border-radius:50%;background:var(--c2);display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;}
 .winner-text{text-align:center;}
-.winner-text .pre{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px;}
-.winner-text h2{font-size:28px;color:white;line-height:1.2;}
-.winner-text .emoji-big{font-size:42px;display:block;margin:10px 0;}
-.winner-text p{font-size:14px;color:rgba(255,255,255,.6);line-height:1.6;margin-top:8px;}
-.vote-breakdown{background:rgba(255,255,255,.08);border-radius:20px;padding:18px;width:100%;}
-.vb-label{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;}
-.vb-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.vb-name{font-size:13px;color:rgba(255,255,255,.8);width:110px;flex-shrink:0;}
-.vb-bar{flex:1;height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;}
+.winner-text .pre{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px;}
+.winner-text h2{font-size:22px;color:white;line-height:1.2;}
+.winner-text .emoji-big{font-size:36px;display:block;margin:8px 0;}
+.winner-text p{font-size:13px;color:rgba(255,255,255,.6);line-height:1.6;margin-top:6px;}
+.vote-breakdown{background:rgba(255,255,255,.08);border-radius:16px;padding:14px;width:100%;}
+.vb-label{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;}
+.vb-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.vb-name{font-size:12px;color:rgba(255,255,255,.8);width:100px;flex-shrink:0;}
+.vb-bar{flex:1;height:5px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;}
 .vb-fill{height:100%;border-radius:3px;background:var(--c2);}
-.vb-pct{font-size:12px;color:rgba(255,255,255,.5);width:36px;text-align:right;}
-.winner-btns{display:flex;flex-direction:column;gap:10px;width:100%;}
-.btn-inv{background:rgba(255,255,255,.12);color:white;border:none;border-radius:100px;padding:15px 24px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;width:100%;}
+.vb-pct{font-size:11px;color:rgba(255,255,255,.5);width:32px;text-align:right;}
+.winner-btns{display:flex;flex-direction:column;gap:9px;width:100%;}
+#s-winner .winner-footer{padding:0 24px 32px;flex-shrink:0;display:flex;flex-direction:column;gap:9px;}
 
-.screen-label{text-align:center;font-size:11px;color:var(--fg3);font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-top:12px;}
-
-/* Round 2 match section */
-.match-section{display:flex;flex-direction:column;gap:8px;}
-.match-divider{height:1.5px;background:var(--border);margin:8px 0;}
+.screen-label{text-align:center;font-size:11px;color:rgba(255,255,255,.6);font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-top:12px;}
 </style>
 
 <div>
 <div class="nav-dots" id="navDots"></div>
 <div class="app-shell">
 
-<!-- SPLASH -->
+<!-- ===== SPLASH ===== -->
 <div class="screen active" id="s-splash">
-  <div class="splash-bg" style="background:var(--c1);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;gap:28px;">
-    <div class="logo-mark" style="width:80px;height:80px;border-radius:24px;background:var(--c2);display:flex;align-items:center;justify-content:center;">
+  <div class="status-bar light" style="background:var(--c1);color:rgba(255,255,255,.5);">
+    <span>9:41</span><span>●●●</span>
+  </div>
+  <div class="splash-hero">
+    <div class="logo-mark">
       <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><path d="M22 6C22 6 8 14 8 24C8 31.7 14.3 38 22 38C29.7 38 36 31.7 36 24C36 14 22 6 22 6Z" fill="white" opacity=".9"/><path d="M16 26C16 22.7 18.7 20 22 20C25.3 20 28 22.7 28 26" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity=".6"/><circle cx="22" cy="26" r="3" fill="white"/></svg>
     </div>
-    <h1 style="font-size:36px;color:white;text-align:center;line-height:1.15;">Group dining,<br/><em style="color:var(--c2);font-style:normal;">decided.</em></h1>
-    <p style="color:rgba(255,255,255,.6);text-align:center;font-size:15px;line-height:1.6;">Stop the endless debate. Taste Tourney turns restaurant selection into a fun tournament your whole group votes on.</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+    <h1>Group dining,<br/><em style="color:var(--c2);font-style:normal;">decided.</em></h1>
+    <p>Stop the mindless debate. Taste Tourney turns restaurant selection into a fun tournament your whole group votes on.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
       <div class="badge dark">🏆 Tournament-style</div>
       <div class="badge dark">👥 Group voting</div>
       <div class="badge dark">📍 Chicago</div>
     </div>
   </div>
-  <div style="padding:24px;display:flex;flex-direction:column;gap:12px;">
+  <div class="splash-bottom">
     <button class="btn-primary" onclick="goTo('s-home')">Get started</button>
-    <button class="btn-outline">Sign in</button>
+    <button class="btn-outline" style="color:white;border-color:rgba(255,255,255,.3);">Sign in</button>
   </div>
 </div>
 
-<!-- HOME -->
+<!-- ===== HOME ===== -->
 <div class="screen" id="s-home">
   <div class="status-bar"><span>9:41</span><span>●●●</span></div>
   <div class="home-hero">
     <p class="greeting">Good evening, Alex 👋</p>
     <h2>Ready to <span>eat?</span></h2>
   </div>
-  <div class="active-card" style="margin:0 20px;margin-top:-20px;background:var(--white);border-radius:20px;padding:18px;border:1.5px solid var(--border);display:flex;flex-direction:column;gap:14px;">
-    <span class="card-label">Active tournament</span>
-    <h3 style="font-size:18px;">Friday Night Out · Chicago</h3>
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;">
-        <div class="avatar" style="background:#E8462A;">A</div>
-        <div class="avatar" style="background:#2D1B69;">M</div>
-        <div class="avatar" style="background:#1E7A3C;">J</div>
-        <div class="avatar" style="background:#B8850A;">S</div>
-        <span class="member-info">4 members</span>
+  <div class="home-content">
+    <div class="active-card">
+      <span class="card-label">Active tournament</span>
+      <h3 style="font-size:16px;">Friday Night Out · Chicago</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;">
+          <div class="avatar" style="background:#E8462A;">A</div>
+          <div class="avatar" style="background:#2D1B69;">M</div>
+          <div class="avatar" style="background:#1E7A3C;">J</div>
+          <div class="avatar" style="background:#B8850A;">S</div>
+          <span class="member-info">4 members</span>
+        </div>
+        <div class="badge red">Round 1</div>
       </div>
-      <div class="badge red">Round 1</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="prog-bar"><div class="prog-fill" style="width:60%"></div></div>
+        <span style="font-size:11px;color:var(--fg2);">3/4 done</span>
+      </div>
+      <button class="btn-primary btn-sm" onclick="goTo('s-r1g1')">Continue voting →</button>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="prog-bar"><div class="prog-fill" style="width:60%"></div></div>
-      <span style="font-size:12px;color:var(--fg2);">3/4 choices made</span>
+    <div class="section-row">
+      <h3>Past tournaments</h3>
+      <span class="see-all">See all</span>
     </div>
-    <button class="btn-primary btn-sm" onclick="goTo('s-r1g1')">Continue voting →</button>
+    <div class="past-card">
+      <div class="past-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.4 7.2L18 8L14 11.9L15.1 17.5L10 14.8L4.9 17.5L6 11.9L2 8L7.6 7.2L10 2Z" fill="white"/></svg></div>
+      <div><p style="font-size:13px;font-weight:500;font-family:'Fraunces',serif;">Work Lunch</p><p style="font-size:11px;color:var(--fg2);margin-top:2px;">Tuesday · Chicago · 6 people</p></div>
+      <div class="past-winner"><span>winner</span><p>Girl & the Goat 🥩</p></div>
+    </div>
+    <div class="past-card">
+      <div class="past-icon"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.4 7.2L18 8L14 11.9L15.1 17.5L10 14.8L4.9 17.5L6 11.9L2 8L7.6 7.2L10 2Z" fill="white"/></svg></div>
+      <div><p style="font-size:13px;font-weight:500;font-family:'Fraunces',serif;">Birthday Dinner</p><p style="font-size:11px;color:var(--fg2);margin-top:2px;">Last Friday · Chicago · 8 people</p></div>
+      <div class="past-winner"><span>winner</span><p>Alinea ✨</p></div>
+    </div>
+    <div class="new-btn-wrap">
+      <button class="btn-primary" onclick="goTo('s-create')">+ New tournament</button>
+    </div>
   </div>
-  <div class="section-row" style="padding:20px 20px 8px;display:flex;align-items:center;justify-content:space-between;">
-    <h3 style="font-size:16px;">Past tournaments</h3>
-    <span style="font-size:12px;color:var(--c2);font-weight:500;cursor:pointer;">See all</span>
-  </div>
-  <div class="past-card">
-    <div class="past-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.4 7.2L18 8L14 11.9L15.1 17.5L10 14.8L4.9 17.5L6 11.9L2 8L7.6 7.2L10 2Z" fill="white"/></svg></div>
-    <div><h4 style="font-size:14px;font-family:'Fraunces',serif;">Work Lunch</h4><p style="font-size:12px;color:var(--fg2);margin-top:2px;">Tuesday · Chicago · 6 people</p></div>
-    <div class="past-winner"><span>winner</span><p>Girl &amp; the Goat 🥩</p></div>
-  </div>
-  <div class="past-card">
-    <div class="past-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.4 7.2L18 8L14 11.9L15.1 17.5L10 14.8L4.9 17.5L6 11.9L2 8L7.6 7.2L10 2Z" fill="white"/></svg></div>
-    <div><h4 style="font-size:14px;font-family:'Fraunces',serif;">Birthday Dinner</h4><p style="font-size:12px;color:var(--fg2);margin-top:2px;">Last Friday · Chicago · 8 people</p></div>
-    <div class="past-winner"><span>winner</span><p>Alinea ✨</p></div>
-  </div>
-  <div style="height:12px;"></div>
-  <div style="padding:0 20px 8px;"><button class="btn-primary" onclick="goTo('s-create')">+ New tournament</button></div>
   <div class="bottom-nav">
     <div class="nav-item active"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2L2 8V18H7V13H13V18H18V8L10 2Z"/></svg>Home</div>
     <div class="nav-item"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6V10L13 12"/></svg>History</div>
@@ -242,90 +300,87 @@ h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:500;}
   </div>
 </div>
 
-<!-- CREATE -->
+<!-- ===== CREATE ===== -->
 <div class="screen" id="s-create">
   <div class="status-bar"><span>9:41</span><span>●●●</span></div>
   <div class="screen-header">
     <div class="back-btn" onclick="goTo('s-home')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 2L4 7L9 12"/></svg></div>
-    <h2 style="font-size:17px;font-family:'Fraunces',serif;">New tournament</h2>
+    <h2 style="font-size:16px;">New tournament</h2>
     <div class="spacer"></div>
   </div>
-  <div class="create-body">
+  <div class="create-scroll">
     <div class="form-group"><label>Tournament name</label><input type="text" value="Friday Night Out"/></div>
     <div class="form-group">
       <label>City</label>
       <div class="city-chips">
-        <div class="city-chip">New York</div>
-        <div class="city-chip selected">Chicago</div>
-        <div class="city-chip">LA</div>
-        <div class="city-chip">Miami</div>
-        <div class="city-chip">Austin</div>
-        <div class="city-chip">SF</div>
+        <div class="city-chip">New York</div><div class="city-chip selected">Chicago</div><div class="city-chip">LA</div><div class="city-chip">Miami</div><div class="city-chip">Austin</div><div class="city-chip">SF</div>
       </div>
     </div>
     <div class="form-group">
-      <label>Add participants</label>
+      <label>Participants</label>
       <div>
-        <div class="contact-row"><div class="avatar" style="background:#E8462A;">MR</div><div class="contact-info"><p>Maya Rivera</p><span>maya@email.com</span></div><div class="check on"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6L5 9L10 3"/></svg></div></div>
-        <div class="contact-row"><div class="avatar" style="background:#2D1B69;">JS</div><div class="contact-info"><p>Jake Sullivan</p><span>jake@email.com</span></div><div class="check on"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6L5 9L10 3"/></svg></div></div>
-        <div class="contact-row"><div class="avatar" style="background:#1E7A3C;">SK</div><div class="contact-info"><p>Sophie Kim</p><span>sophie@email.com</span></div><div class="check on"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6L5 9L10 3"/></svg></div></div>
-        <div class="contact-row"><div class="avatar" style="background:#B8850A;">TN</div><div class="contact-info"><p>Tom Nakamura</p><span>tom@email.com</span></div><div class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6L5 9L10 3"/></svg></div></div>
+        <div class="contact-row"><div class="c-avatar" style="background:#E8462A;">MR</div><div class="contact-info"><p>Maya Rivera</p><span>maya@email.com</span></div><div class="check on"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6L5 9L10 3"/></svg></div></div>
+        <div class="contact-row"><div class="c-avatar" style="background:#2D1B69;">JS</div><div class="contact-info"><p>Jake Sullivan</p><span>jake@email.com</span></div><div class="check on"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6L5 9L10 3"/></svg></div></div>
+        <div class="contact-row"><div class="c-avatar" style="background:#1E7A3C;">SK</div><div class="contact-info"><p>Sophie Kim</p><span>sophie@email.com</span></div><div class="check on"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6L5 9L10 3"/></svg></div></div>
+        <div class="contact-row"><div class="c-avatar" style="background:#B8850A;">TN</div><div class="contact-info"><p>Tom Nakamura</p><span>tom@email.com</span></div><div class="check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><path d="M2 6L5 9L10 3"/></svg></div></div>
       </div>
     </div>
+  </div>
+  <div class="create-footer">
     <button class="btn-primary" onclick="goTo('s-nominate')">Continue to nominations →</button>
   </div>
 </div>
 
-<!-- NOMINATE -->
+<!-- ===== NOMINATE ===== -->
 <div class="screen" id="s-nominate">
   <div class="status-bar"><span>9:41</span><span>●●●</span></div>
   <div class="screen-header">
     <div class="back-btn" onclick="goTo('s-create')"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 2L4 7L9 12"/></svg></div>
-    <h2 style="font-size:17px;font-family:'Fraunces',serif;">Your nominations</h2>
+    <h2 style="font-size:16px;">Your nominations</h2>
     <div class="spacer"></div>
     <div class="badge">3 of 4</div>
   </div>
-  <div class="nom-body">
+  <div class="nom-scroll">
     <div class="nom-info">
       <div class="nom-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="white" stroke-width="1.5"/><path d="M9 6V9L11 11" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-      <p style="font-size:13px;color:var(--fg2);line-height:1.5;">Nominate up to <strong>4 Chicago restaurants</strong>. Everyone's picks form the pool of 16 options for the tournament.</p>
+      <p style="font-size:12px;color:var(--fg2);line-height:1.5;">Nominate up to <strong>4 Chicago restaurants</strong>. Everyone's picks form the pool of 16.</p>
     </div>
-    <div class="nom-input-row"><input type="text" placeholder="Search Chicago restaurants…"/><button class="add-btn"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="2.5"><path d="M9 3V15M3 9H15"/></svg></button></div>
+    <div class="nom-input-row"><input type="text" placeholder="Search Chicago restaurants…"/><button class="add-btn"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="2.5"><path d="M9 3V15M3 9H15"/></svg></button></div>
     <div style="display:flex;flex-direction:column;gap:8px;">
-      <div class="nom-item"><div class="nom-num">1</div><div style="flex:1"><p class="nom-name">Girl &amp; the Goat</p><span class="nom-cuisine">American · West Loop</span></div><button class="del-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><path d="M2 2L12 12M12 2L2 12"/></svg></button></div>
-      <div class="nom-item"><div class="nom-num">2</div><div style="flex:1"><p class="nom-name">Alinea</p><span class="nom-cuisine">Avant-garde · Lincoln Park</span></div><button class="del-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><path d="M2 2L12 12M12 2L2 12"/></svg></button></div>
-      <div class="nom-item"><div class="nom-num">3</div><div style="flex:1"><p class="nom-name">Au Cheval</p><span class="nom-cuisine">American · West Loop</span></div><button class="del-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14"><path d="M2 2L12 12M12 2L2 12"/></svg></button></div>
+      <div class="nom-item"><div class="nom-num">1</div><div style="flex:1"><p class="nom-name">Girl & the Goat</p><span class="nom-cuisine">American · West Loop</span></div><button class="del-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><path d="M2 2L12 12M12 2L2 12"/></svg></button></div>
+      <div class="nom-item"><div class="nom-num">2</div><div style="flex:1"><p class="nom-name">Alinea</p><span class="nom-cuisine">Avant-garde · Lincoln Park</span></div><button class="del-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><path d="M2 2L12 12M12 2L2 12"/></svg></button></div>
+      <div class="nom-item"><div class="nom-num">3</div><div style="flex:1"><p class="nom-name">Au Cheval</p><span class="nom-cuisine">American · West Loop</span></div><button class="del-btn"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><path d="M2 2L12 12M12 2L2 12"/></svg></button></div>
     </div>
+  </div>
+  <div class="nom-footer">
     <button class="btn-primary" onclick="goTo('s-r1g1')">Submit nominations →</button>
   </div>
 </div>
 
-<!-- ROUND 1 · GROUP 1 -->
+<!-- ===== ROUND 1 G1 ===== -->
 <div class="screen" id="s-r1g1">
   <div class="round-hdr" style="background:var(--c1);">
-    <div class="hdr-row"><span class="round-label">Round 1 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;">Group 1 of 4</div></div>
-    <h2>Pick your favourite</h2>
-    <p class="sub">Choose one from this group of four</p>
+    <div class="hdr-row"><span class="round-label">Round 1 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;font-size:11px;">Group 1 of 4</div></div>
+    <h2>Pick your favourite</h2><p class="sub">Choose one from this group of four</p>
   </div>
   <div class="round-body">
     <div class="pips"><div class="pip active"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div></div>
     <p class="vote-instruction">Tap a card to select, then confirm</p>
     <div class="vote-grid" id="g1">
-      <div class="vote-card" onclick="selectVote(this,'g1')"><div class="vote-top"><span class="vote-emoji">🥩</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Girl &amp; the Goat</p><p class="vote-meta">American · $$$</p></div>
+      <div class="vote-card" onclick="selectVote(this,'g1')"><div class="vote-top"><span class="vote-emoji">🥩</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Girl & the Goat</p><p class="vote-meta">American · $$$</p></div>
       <div class="vote-card" onclick="selectVote(this,'g1')"><div class="vote-top"><span class="vote-emoji">✨</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Alinea</p><p class="vote-meta">Avant-garde · $$$$</p></div>
       <div class="vote-card" onclick="selectVote(this,'g1')"><div class="vote-top"><span class="vote-emoji">🍔</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Au Cheval</p><p class="vote-meta">American · $$</p></div>
       <div class="vote-card" onclick="selectVote(this,'g1')"><div class="vote-top"><span class="vote-emoji">🍕</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Pequod's Pizza</p><p class="vote-meta">Deep Dish · $</p></div>
     </div>
-    <button class="btn-primary" onclick="goTo('s-r1g2')">Next group →</button>
   </div>
+  <div class="round-footer"><button class="btn-primary" onclick="goTo('s-r1g2')">Next group →</button></div>
 </div>
 
-<!-- ROUND 1 · GROUP 2 -->
+<!-- ===== ROUND 1 G2 ===== -->
 <div class="screen" id="s-r1g2">
   <div class="round-hdr" style="background:var(--c1);">
-    <div class="hdr-row"><span class="round-label">Round 1 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;">Group 2 of 4</div></div>
-    <h2>Pick your favourite</h2>
-    <p class="sub">Choose one from this group of four</p>
+    <div class="hdr-row"><span class="round-label">Round 1 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;font-size:11px;">Group 2 of 4</div></div>
+    <h2>Pick your favourite</h2><p class="sub">Choose one from this group of four</p>
   </div>
   <div class="round-body">
     <div class="pips"><div class="pip done"></div><div class="pip active"></div><div class="pip"></div><div class="pip"></div></div>
@@ -336,16 +391,15 @@ h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:500;}
       <div class="vote-card" onclick="selectVote(this,'g2')"><div class="vote-top"><span class="vote-emoji">🥗</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Nobu Chicago</p><p class="vote-meta">Japanese · $$$$</p></div>
       <div class="vote-card" onclick="selectVote(this,'g2')"><div class="vote-top"><span class="vote-emoji">🌮</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Big Star</p><p class="vote-meta">Tacos · $</p></div>
     </div>
-    <button class="btn-primary" onclick="goTo('s-r1g3')">Next group →</button>
   </div>
+  <div class="round-footer"><button class="btn-primary" onclick="goTo('s-r1g3')">Next group →</button></div>
 </div>
 
-<!-- ROUND 1 · GROUP 3 -->
+<!-- ===== ROUND 1 G3 ===== -->
 <div class="screen" id="s-r1g3">
   <div class="round-hdr" style="background:var(--c1);">
-    <div class="hdr-row"><span class="round-label">Round 1 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;">Group 3 of 4</div></div>
-    <h2>Pick your favourite</h2>
-    <p class="sub">Choose one from this group of four</p>
+    <div class="hdr-row"><span class="round-label">Round 1 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;font-size:11px;">Group 3 of 4</div></div>
+    <h2>Pick your favourite</h2><p class="sub">Choose one from this group of four</p>
   </div>
   <div class="round-body">
     <div class="pips"><div class="pip done"></div><div class="pip done"></div><div class="pip active"></div><div class="pip"></div></div>
@@ -356,16 +410,15 @@ h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:500;}
       <div class="vote-card" onclick="selectVote(this,'g3')"><div class="vote-top"><span class="vote-emoji">🥐</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Avec</p><p class="vote-meta">Mediterranean · $$</p></div>
       <div class="vote-card" onclick="selectVote(this,'g3')"><div class="vote-top"><span class="vote-emoji">🥩</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">RPM Steak</p><p class="vote-meta">Steakhouse · $$$$</p></div>
     </div>
-    <button class="btn-primary" onclick="goTo('s-r1g4')">Next group →</button>
   </div>
+  <div class="round-footer"><button class="btn-primary" onclick="goTo('s-r1g4')">Next group →</button></div>
 </div>
 
-<!-- ROUND 1 · GROUP 4 -->
+<!-- ===== ROUND 1 G4 ===== -->
 <div class="screen" id="s-r1g4">
   <div class="round-hdr" style="background:var(--c1);">
-    <div class="hdr-row"><span class="round-label">Round 1 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;">Group 4 of 4</div></div>
-    <h2>Pick your favourite</h2>
-    <p class="sub">Choose one from this group of four</p>
+    <div class="hdr-row"><span class="round-label">Round 1 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;font-size:11px;">Group 4 of 4</div></div>
+    <h2>Pick your favourite</h2><p class="sub">Choose one from this group of four</p>
   </div>
   <div class="round-body">
     <div class="pips"><div class="pip done"></div><div class="pip done"></div><div class="pip done"></div><div class="pip active"></div></div>
@@ -376,124 +429,115 @@ h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:500;}
       <div class="vote-card" onclick="selectVote(this,'g4')"><div class="vote-top"><span class="vote-emoji">🫕</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Smyth</p><p class="vote-meta">American · $$$$</p></div>
       <div class="vote-card" onclick="selectVote(this,'g4')"><div class="vote-top"><span class="vote-emoji">🌶️</span><div class="vote-check"><svg viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2"><path d="M1.5 5.5L4.5 8.5L9.5 2.5"/></svg></div></div><p class="vote-name">Frontera Grill</p><p class="vote-meta">Mexican · $$</p></div>
     </div>
-    <button class="btn-primary" onclick="goTo('s-r2m1')">Submit Round 1 →</button>
   </div>
+  <div class="round-footer"><button class="btn-primary" onclick="goTo('s-r2m1')">Submit Round 1 →</button></div>
 </div>
 
-<!-- ROUND 2 · MATCH 1 -->
+<!-- ===== ROUND 2 M1 ===== -->
 <div class="screen" id="s-r2m1">
   <div class="round-hdr" style="background:#2D1B69;">
-    <div class="hdr-row"><span class="round-label">Round 2 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;">Match 1 of 2</div></div>
-    <h2>The semifinals</h2>
-    <p class="sub">Group favourites — pick one</p>
+    <div class="hdr-row"><span class="round-label">Round 2 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;font-size:11px;">Match 1 of 2</div></div>
+    <h2>The semifinals</h2><p class="sub">Group favourites — pick one</p>
   </div>
   <div class="round-body">
     <div class="pips"><div class="pip active"></div><div class="pip"></div></div>
     <p class="vote-instruction">These two had the most votes in Round 1</p>
     <div class="match-section" id="m1">
       <div class="duel-card" onclick="selectDuel(this,'m1')">
-        <span class="duel-emoji">🥩</span>
-        <h3>Girl &amp; the Goat</h3>
+        <span class="duel-emoji">🥩</span><h3>Girl & the Goat</h3>
         <p class="duel-meta">American · West Loop · $$$</p>
         <div class="duel-votes"><div class="badge">4 group votes</div><div class="badge green">Your pick</div></div>
       </div>
       <div class="vs-divider">— VS —</div>
       <div class="duel-card" onclick="selectDuel(this,'m1')">
-        <span class="duel-emoji">🍝</span>
-        <h3>Monteverde</h3>
+        <span class="duel-emoji">🍝</span><h3>Monteverde</h3>
         <p class="duel-meta">Italian · West Loop · $$$</p>
         <div class="duel-votes"><div class="badge">3 group votes</div></div>
       </div>
     </div>
-    <button class="btn-primary" onclick="goTo('s-r2m2')">Next match →</button>
   </div>
+  <div class="round-footer"><button class="btn-primary" onclick="goTo('s-r2m2')">Next match →</button></div>
 </div>
 
-<!-- ROUND 2 · MATCH 2 -->
+<!-- ===== ROUND 2 M2 ===== -->
 <div class="screen" id="s-r2m2">
   <div class="round-hdr" style="background:#2D1B69;">
-    <div class="hdr-row"><span class="round-label">Round 2 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;">Match 2 of 2</div></div>
-    <h2>The semifinals</h2>
-    <p class="sub">Group favourites — pick one</p>
+    <div class="hdr-row"><span class="round-label">Round 2 of 3</span><div class="badge" style="background:rgba(255,255,255,.15);color:white;font-size:11px;">Match 2 of 2</div></div>
+    <h2>The semifinals</h2><p class="sub">Group favourites — pick one</p>
   </div>
   <div class="round-body">
     <div class="pips"><div class="pip done"></div><div class="pip active"></div></div>
     <p class="vote-instruction">These two had the most votes in Round 1</p>
     <div class="match-section" id="m2">
       <div class="duel-card" onclick="selectDuel(this,'m2')">
-        <span class="duel-emoji">✨</span>
-        <h3>Alinea</h3>
+        <span class="duel-emoji">✨</span><h3>Alinea</h3>
         <p class="duel-meta">Avant-garde · Lincoln Park · $$$$</p>
         <div class="duel-votes"><div class="badge">3 group votes</div></div>
       </div>
       <div class="vs-divider">— VS —</div>
       <div class="duel-card" onclick="selectDuel(this,'m2')">
-        <span class="duel-emoji">🍣</span>
-        <h3>Omakase Yume</h3>
+        <span class="duel-emoji">🍣</span><h3>Omakase Yume</h3>
         <p class="duel-meta">Japanese · River North · $$$$</p>
         <div class="duel-votes"><div class="badge">3 group votes</div></div>
       </div>
     </div>
-    <button class="btn-primary" onclick="goTo('s-final')">Submit Round 2 →</button>
   </div>
+  <div class="round-footer"><button class="btn-primary" onclick="goTo('s-final')">Submit Round 2 →</button></div>
 </div>
 
-<!-- FINAL ROUND -->
+<!-- ===== FINAL ===== -->
 <div class="screen" id="s-final">
   <div class="round-hdr" style="background:linear-gradient(135deg,#1A1A2E,#E8462A);">
-    <div class="hdr-row"><span class="round-label" style="color:rgba(255,255,255,.7);">Final round</span><div class="badge" style="background:rgba(255,255,255,.2);color:white;">🏆 Championship</div></div>
-    <h2>The grand finale</h2>
-    <p class="sub">This is it — choose your champion</p>
+    <div class="hdr-row"><span class="round-label" style="color:rgba(255,255,255,.7);">Final round</span><div class="badge" style="background:rgba(255,255,255,.2);color:white;font-size:11px;">🏆 Championship</div></div>
+    <h2>The grand finale</h2><p class="sub">This is it — choose your champion</p>
   </div>
   <div class="round-body">
     <p class="vote-instruction" style="font-weight:500;">Your last vote of the night</p>
-    <div style="display:flex;flex-direction:column;gap:12px;" id="finGrid">
+    <div style="display:flex;flex-direction:column;gap:10px;" id="finGrid">
       <div class="finalist-card" onclick="selectFin(this)">
-        <p class="fin-number">Finalist A</p>
-        <span class="fin-emoji">🥩</span>
-        <h3>Girl &amp; the Goat</h3>
-        <p class="fin-meta">American · West Loop</p>
+        <p class="fin-number">Finalist A</p><span class="fin-emoji">🥩</span>
+        <h3>Girl & the Goat</h3><p class="fin-meta">American · West Loop</p>
         <div class="fin-bar"><div class="fin-fill" style="width:58%"></div></div>
         <div class="fin-stats"><span>Group support</span><span>58%</span></div>
       </div>
       <div class="finalist-card" onclick="selectFin(this)">
-        <p class="fin-number">Finalist B</p>
-        <span class="fin-emoji">✨</span>
-        <h3>Alinea</h3>
-        <p class="fin-meta">Avant-garde · Lincoln Park</p>
+        <p class="fin-number">Finalist B</p><span class="fin-emoji">✨</span>
+        <h3>Alinea</h3><p class="fin-meta">Avant-garde · Lincoln Park</p>
         <div class="fin-bar"><div class="fin-fill" style="width:42%;background:#7B61FF"></div></div>
         <div class="fin-stats"><span>Group support</span><span>42%</span></div>
       </div>
     </div>
-    <button class="btn-primary" onclick="goTo('s-winner')">Cast final vote →</button>
   </div>
+  <div class="round-footer"><button class="btn-primary" onclick="goTo('s-winner')">Cast final vote →</button></div>
 </div>
 
-<!-- WINNER -->
-<div class="screen" id="s-winner" style="background:var(--c1);">
-  <div class="status-bar" style="padding:12px 20px 0;display:flex;justify-content:space-between;color:rgba(255,255,255,.4);"><span>9:41</span><span>●●●</span></div>
-  <div class="winner-body">
+<!-- ===== WINNER ===== -->
+<div class="screen" id="s-winner">
+  <div class="status-bar" style="background:var(--c1);color:rgba(255,255,255,.4);">
+    <span>9:41</span><span>●●●</span>
+  </div>
+  <div class="winner-scroll">
     <div class="trophy-circle">🏆</div>
     <div class="winner-text">
       <p class="pre">The group has spoken</p>
       <h2>Tonight you're eating at...</h2>
       <span class="emoji-big">🥩</span>
-      <h2 style="font-size:36px;color:var(--c2);">Girl &amp; the Goat</h2>
+      <h2 style="font-size:32px;color:var(--c2);">Girl & the Goat</h2>
       <p>American · West Loop · $$$<br/>809 W Randolph St, Chicago</p>
     </div>
     <div class="vote-breakdown">
       <p class="vb-label">Final vote breakdown</p>
-      <div class="vb-row"><span class="vb-name">Girl &amp; the Goat</span><div class="vb-bar"><div class="vb-fill" style="width:72%"></div></div><span class="vb-pct">72%</span></div>
+      <div class="vb-row"><span class="vb-name">Girl & the Goat</span><div class="vb-bar"><div class="vb-fill" style="width:72%"></div></div><span class="vb-pct">72%</span></div>
       <div class="vb-row"><span class="vb-name">Alinea</span><div class="vb-bar"><div class="vb-fill" style="width:28%;background:rgba(255,255,255,.3)"></div></div><span class="vb-pct">28%</span></div>
     </div>
-    <div class="winner-btns">
-      <button class="btn-primary">Make a reservation →</button>
-      <button class="btn-inv" onclick="goTo('s-home')">Back to home</button>
-    </div>
+  </div>
+  <div class="winner-footer">
+    <button class="btn-primary">Make a reservation →</button>
+    <button class="btn-inv" onclick="goTo('s-home')">Back to home</button>
   </div>
 </div>
 
-</div><!-- app-shell -->
+</div>
 <div class="screen-label" id="screenLabel"></div>
 </div>
 
@@ -517,21 +561,10 @@ function goToIdx(i){
   document.querySelectorAll('.nav-dot')[current].classList.add('active');
   document.getElementById('screenLabel').textContent=labels[i];
 }
-function selectVote(el,gid){
-  document.querySelectorAll('#'+gid+' .vote-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
-}
-function selectDuel(el,mid){
-  document.querySelectorAll('#'+mid+' .duel-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
-}
-function selectFin(el){
-  document.querySelectorAll('#finGrid .finalist-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
-}
+function selectVote(el,gid){document.querySelectorAll('#'+gid+' .vote-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
+function selectDuel(el,mid){document.querySelectorAll('#'+mid+' .duel-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
+function selectFin(el){document.querySelectorAll('#finGrid .finalist-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
 document.getElementById('screenLabel').textContent=labels[0];
-document.querySelectorAll('.city-chip').forEach(c=>{
-  c.onclick=()=>{document.querySelectorAll('.city-chip').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');};
-});
+document.querySelectorAll('.city-chip').forEach(c=>{c.onclick=()=>{document.querySelectorAll('.city-chip').forEach(x=>x.classList.remove('selected'));c.classList.add('selected');};});
 document.querySelectorAll('.contact-row .check').forEach(c=>{c.onclick=()=>c.classList.toggle('on');});
 </script>
